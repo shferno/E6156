@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "angular": "^1.8.3",
+    "codelyzer": "^6.0.2",
+    "tslint": "^6.1.3"
+  }
+}

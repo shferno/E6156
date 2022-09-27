@@ -1,0 +1,9 @@
+[submodule "F22-Simple-Web-UI"]
+	path = F22-Simple-Web-UI
+	url = https://github.com/donald-f-ferguson/F22-Simple-Web-UI.git
+[submodule "F22-Starter-Microservice"]
+	path = F22-Starter-Microservice
+	url = https://github.com/donald-f-ferguson/F22-Starter-Microservice.git
+[submodule "F22-Starter-DB"]
+	path = F22-Starter-DB
+	url = https://github.com/donald-f-ferguson/F22-Starter-DB.git
