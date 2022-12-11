@@ -28,7 +28,7 @@ def circuits_name():
         rsp = Response(json.dumps(name), status=404, content_type="text/plain")
     return rsp
 
-# only add name in circuits
+# create a new circuits
 @app.route("/f1_circuits/add/", methods = ['POST'])
 def add_circuits():
     id = request.form.get('id')
@@ -42,7 +42,7 @@ def add_circuits():
     url = request.form.get('url')
     res = F1.append_new_circuits_name(id, Ref, name, loc, country, lat, lng, alt, url)
     if res:
-        return '<script> alert("Fail to add data");location.href = "/";</script>'
+        return f'<script> alert("{res}");location.href = "/";</script>'
     else:
         return '<script> alert("Success");location.hred = "/";</script>'
 
@@ -56,7 +56,7 @@ def update_circuits():
     name = request.form.get('name')
     res = F1.update_circuits(id, name)
     if res:
-        return '<script> alert("Fail to update data");location.href = "/";</script>'
+        return f'<script> alert("{res}");location.href = "/";</script>'
     else:
         return '<script> alert("Success");location.href = "/";</script>'
 
@@ -73,11 +73,13 @@ def update_circuits():
 #         rsp = Response("NOT FOUND", status=404, content_type="text/plain")
 #
 #     return rsp
+
+# redirect to student functions' Homepage
 @app.route('/students')
 def student_Home():
     return render_template("studentHome.html")
 
-#studentInfo should be like (first_name, middle_name, last_name, email, School_code )
+# use firstname to get information
 @app.route("/students/fn/<path:first_name>", methods = ["GET"])
 def get_student_by_firstname(first_name):
     res = CSR.get_by_firstname(first_name)
@@ -87,6 +89,7 @@ def get_student_by_firstname(first_name):
         rsp = Response(json.dumps(res), status = 404, content_type = "text_plain")
     return rsp
 
+# use firstname and email address to get information or only get email
 @app.route("/students/fn/<first_name>/ad/<address>")
 def get_student_by_info(first_name, address):
     if address == 'address':
@@ -106,6 +109,9 @@ def get_student_by_info(first_name, address):
             return rsp
         else:
             return "<script>alert('wrong email address input');location.href='/';</script>"
+
+
+# use firstname and lastname to get information
 @app.route("/students/fn/<first_name>/ln/<last_name>")
 def get_student_by_firstname_lastname(first_name, last_name):
     res = CSR.get_info_by_firstname_lastname(first_name, last_name)
@@ -114,6 +120,53 @@ def get_student_by_firstname_lastname(first_name, last_name):
     else:
         rsp = Response(json.dumps(res), status=404, content_type="text_plain")
     return rsp
+# post function
+# not sure whether we need this
+@app.route("/students/add/")
+def add_student():
+    return render_template('./template/create_students.html')
+
+@app.route("/students/add/", methods = ["POST"])
+def add_students():
+    student_id = request.form.get('id')
+    first_name = request.form.get('fn')
+    middle_name = request.form.get('mn')
+    last_name = request.form.get('ln')
+    email = request.form.get('email')
+    school_code = request.form.get('sc')
+    res = CSR.append_new_students(student_id, first_name, middle_name, last_name, email, school_code)
+    if res:
+        return f'<script> alert("{res}");location.href = "/";</script>'
+    else:
+        return '<script> alert("Success");location.hred = "/";</script>'
+
+# update function
+# not sure whether we need this
+@app.route('/students/update')
+def update_students_page():
+    return render_template('PUT.html')
+
+# put function
+# according firstname update email address
+@app.route('/students/update/', methods = ['PUT'])
+def update_students():
+    first_name = request.form.get('fn')
+    email = request.form.get('email')
+    res = CSR.update_students_by_firstname(first_name, email)
+    if res:
+        return f'<script> alert("{res}");location.href = "/";</script>'
+    else:
+        return '<script> alert("Success");location.href = "/";</script>'
+
+
+# delete function
+@app.route('/students/delete/fn/<firstname>', methods = ["DELETE"])
+def delete_students_by_firstname(firstname):
+    res = CSR.delete_students_by_firstname(firstname)
+    if res:
+        return f'<script> alert("{res}");location.href = "/";</script>'
+    else:
+        return '<script> alert("Success");location.href = "/";</script>'
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5011)

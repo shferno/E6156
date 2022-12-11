@@ -65,3 +65,47 @@ class ColumbiaStudentResource:
         res = cur.execute(sql, (firstname, lastname))
         result = cur.fetchall()
         return result
+    @staticmethod
+    def append_new_students(student_id, first_name, middle_name, last_name, email, school_code):
+        sql = "INSERT INTO f22_database.sample_student_info VALUES (%s, %s, %s, %s, %s, %s);"
+        conn = ColumbiaStudentResource._get_connection()
+        cur = conn.cursor()
+        try:
+            conn.begin()
+            res = cur.execute(sql, (student_id, first_name, middle_name, last_name, email, school_code))
+            conn.commit()
+            cur.close()
+            conn.close()
+        except Exception as e:
+            conn.rollback()
+            return e
+
+    @staticmethod
+    def update_students_by_firstname(first_name, email):
+        sql = "UPDATE f22_database.sample_student_info set email = %s where first_name = %s;"
+        conn = ColumbiaStudentResource._get_connection()
+        cur = conn.cursor()
+        try:
+            conn.begin()
+            res = cur.execute(sql, (email, first_name))
+            conn.commit()
+            cur.close()
+            conn.close()
+        except Exception as e:
+            conn.rollback()
+            return e
+
+    @staticmethod
+    def delete_students_by_firstname(first_name):
+        sql = "DELETE from f22_database.sample_student_info where first_name=%s;"
+        conn = ColumbiaStudentResource._get_connection()
+        cur = conn.cursor()
+        try:
+            conn.begin()
+            res = cur.execute(sql, first_name)
+            conn.commit()
+            cur.close()
+            conn.close()
+        except Exception as e:
+            conn.rollback()
+            return e
