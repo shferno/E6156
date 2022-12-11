@@ -3,21 +3,23 @@ from datetime import datetime
 import json
 from columbia_student_resource import ColumbiaStudentResource
 from circuits_resource import F1
+from columbia_student_resource import ColumbiaStudentResource as CSR
 from flask_cors import CORS
+import re
 
 
 # Create the Flask application object.
 app = Flask(__name__, template_folder = "/Users/sfy/Desktop/F1/Project/template")
 CORS(app)
-@app.route('/')
+@app.route('/f1_circuits')
 def Home():
-    return render_template('../../front-end/template/Home.html')
+    return render_template('./template/Home.html')
 
 @app.route("/f1_circuits/add/")
 def ad():
-    return render_template('../../front-end/template/add.html')
+    return render_template('./template/add.html')
 
-@app.route("/f1/circuits_name", methods = ['GET'])
+@app.route("/f1_circuits/circuits_name", methods = ['GET'])
 def circuits_name():
     name = F1.get_circuits_name()
     if name:
@@ -56,45 +58,61 @@ def update_circuits():
     if res:
         return '<script> alert("Fail to update data");location.href = "/";</script>'
     else:
-        return '<script> alert("Success");location.hred = "/";</script>'
+        return '<script> alert("Success");location.href = "/";</script>'
 
 
+#
+# @app.route("/students/<uni>", methods=["GET"])
+# def get_student_by_uni(uni):
+#
+#     result = ColumbiaStudentResource.get_by_key(uni)
+#
+#     if result:
+#         rsp = Response(json.dumps(result), status=200, content_type="application.json")
+#     else:
+#         rsp = Response("NOT FOUND", status=404, content_type="text/plain")
+#
+#     return rsp
+@app.route('/students')
+def student_Home():
+    return render_template("studentHome.html")
 
-# @app.post("/f1/add_circuits_name")
-# def add_circuits_name():
-
-
-
-
-
-
-
-
-@app.get("/api/health")
-def get_health():
-    t = str(datetime.now())
-    msg = {
-        "name": "F22-Starter-Microservice",
-        "health": "Good",
-        "at time": t
-    }
-
-    # DFF TODO Explain status codes, content type, ... ...
-    result = Response(json.dumps(msg), status=200, content_type="application/json")
-
-    return result
-
-
-@app.route("/api/students/<uni>", methods=["GET"])
-def get_student_by_uni(uni):
-
-    result = ColumbiaStudentResource.get_by_key(uni)
-
-    if result:
-        rsp = Response(json.dumps(result), status=200, content_type="application.json")
+#studentInfo should be like (first_name, middle_name, last_name, email, School_code )
+@app.route("/students/fn/<path:first_name>", methods = ["GET"])
+def get_student_by_firstname(first_name):
+    res = CSR.get_by_firstname(first_name)
+    if res:
+        rsp = Response(json.dumps(res), status = 200, content_type = "application.json")
     else:
-        rsp = Response("NOT FOUND", status=404, content_type="text/plain")
+        rsp = Response(json.dumps(res), status = 404, content_type = "text_plain")
+    return rsp
 
+@app.route("/students/fn/<first_name>/ad/<address>")
+def get_student_by_info(first_name, address):
+    if address == 'address':
+        res = CSR.get_address_by_first_name(first_name)
+        if res:
+            rsp = Response(json.dumps(res), status=200, content_type="application.json")
+        else:
+            rsp = Response(json.dumps(res), status=404, content_type="text_plain")
+        return rsp
+    else:
+        if re.match(r"^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$", address):
+            res = CSR.get_info_by_firstname_address(first_name, address)
+            if res:
+                rsp = Response(json.dumps(res), status=200, content_type="application.json")
+            else:
+                rsp = Response(json.dumps(res), status=404, content_type="text_plain")
+            return rsp
+        else:
+            return "<script>alert('wrong email address input');location.href='/';</script>"
+@app.route("/students/fn/<first_name>/ln/<last_name>")
+def get_student_by_firstname_lastname(first_name, last_name):
+    res = CSR.get_info_by_firstname_lastname(first_name, last_name)
+    if res:
+        rsp = Response(json.dumps(res), status=200, content_type="application.json")
+    else:
+        rsp = Response(json.dumps(res), status=404, content_type="text_plain")
     return rsp
 
 if __name__ == "__main__":

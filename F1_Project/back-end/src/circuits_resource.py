@@ -14,8 +14,8 @@ class F1:
         host = os.environ.get('DBHOST')
 
         conn = pymysql.connect(
-            user= 'root',
-            password='admin',
+            user= usr,
+            password=pw,
             host= host,
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=True
