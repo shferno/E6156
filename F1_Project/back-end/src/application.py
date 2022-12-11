@@ -46,7 +46,7 @@ def add_circuits():
     else:
         return '<script> alert("Success");location.hred = "/";</script>'
 
-
+# jump to a new page to fill all the required information
 @app.route('/f1_circuits/update')
 def update():
     return render_template('PUT.html')
@@ -73,11 +73,14 @@ def update_circuits():
 #         rsp = Response("NOT FOUND", status=404, content_type="text/plain")
 #
 #     return rsp
+
+
+# students will jump to the studentHome page
 @app.route('/students')
 def student_Home():
     return render_template("studentHome.html")
 
-#studentInfo should be like (first_name, middle_name, last_name, email, School_code )
+# use firstname
 @app.route("/students/fn/<path:first_name>", methods = ["GET"])
 def get_student_by_firstname(first_name):
     res = CSR.get_by_firstname(first_name)
@@ -87,6 +90,7 @@ def get_student_by_firstname(first_name):
         rsp = Response(json.dumps(res), status = 404, content_type = "text_plain")
     return rsp
 
+# use firstname and address
 @app.route("/students/fn/<first_name>/ad/<address>")
 def get_student_by_info(first_name, address):
     if address == 'address':
@@ -106,6 +110,9 @@ def get_student_by_info(first_name, address):
             return rsp
         else:
             return "<script>alert('wrong email address input');location.href='/';</script>"
+
+        
+# use firstname and lastname
 @app.route("/students/fn/<first_name>/ln/<last_name>")
 def get_student_by_firstname_lastname(first_name, last_name):
     res = CSR.get_info_by_firstname_lastname(first_name, last_name)
