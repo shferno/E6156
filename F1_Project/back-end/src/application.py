@@ -4,13 +4,33 @@ import json
 from columbia_student_resource import ColumbiaStudentResource
 from circuits_resource import F1
 from columbia_student_resource import ColumbiaStudentResource as CSR
+from Authentication import Auth
 from flask_cors import CORS
 import re
 
 
 # Create the Flask application object.
+#template_folder need to update
 app = Flask(__name__, template_folder = "/Users/sfy/Desktop/F1/Project/template")
 CORS(app)
+
+#navigate to all the pages
+@app.route('/')
+def Nav():
+    return render_template('./template/Navigation')
+
+@app.route('/login', methods = ["GET", "POST"])
+def login():
+    if request.method == 'POST' and 'USER' in request.form and "PASSWORD" in request.form:
+        user = request.form.get('USER')
+        pw = request.form.get('PASSWORD')
+        res = Auth.login_check(user, pw)
+        if res:
+            # need change to the Home or other pages
+            return '<script> alert("Success");location.hred = "/";</script>'
+    # need to reload login
+    return render_template('./template/login.html')
+
 @app.route('/f1_circuits')
 def Home():
     return render_template('./template/Home.html')
