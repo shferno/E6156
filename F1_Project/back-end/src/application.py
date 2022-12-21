@@ -1,4 +1,4 @@
-from flask import Flask, Response, request, render_template
+from flask import Flask, Response, request, render_template, redirect
 from datetime import datetime
 import json
 from columbia_student_resource import ColumbiaStudentResource
@@ -8,9 +8,14 @@ from Authentication import Auth
 from flask_cors import CORS
 import re
 
+# need set a new one with new callback, callback is connected with client_secret which is defined in the github
+# So in order to get a fully complete project oauth authentication, we need set a new oauth app in github.
+client_id = "27a537a3624c4cd3cf9b"
+client_secret = "e96ea92aa6646d8624041ec41bea582c7a5f180a"
+global access_token
 
 # Create the Flask application object.
-#template_folder need to update
+# template_folder need to update
 app = Flask(__name__, template_folder = "/Users/sfy/Desktop/F1/Project/template")
 CORS(app)
 
@@ -19,7 +24,17 @@ CORS(app)
 def Nav():
     return render_template('./template/Navigation')
 
-@app.route('/login', methods = ["GET", "POST"])
+
+
+# in the login, we need add a button or hyperlink to load github url
+# github URL is: https://github.com/login/oauth/authorize?client_id="your id"&redirect_uri=http://localhost:5011/customer/github/redirect
+# in the above link we need change $ client_id = "your id"$ and $ redirect_uri $
+@app.route('/login')
+def loginredirect():
+    return render_template('login.html')
+
+
+@app.route('/login', methods = ["POST"])
 def login():
     if request.method == 'POST' and 'USER' in request.form and "PASSWORD" in request.form:
         user = request.form.get('USER')
@@ -27,12 +42,45 @@ def login():
         res = Auth.login_check(user, pw)
         if res:
             # need change to the Home or other pages
-            return '<script> alert("Success");location.hred = "/";</script>'
-    # need to reload login
-    return render_template('./template/login.html')
+            return redirect('/f1_circuits')
+    # need to redirect to a failure website and get a new button for new pages
+    return render_template('./template/failure.html')
+
+
+
+@app.route('/customer/github/redirect')
+def github_redirect():
+    global access_token
+    code = request.args.get('code')
+    token_url = "https://github.com/login/oauth/access_token?" \
+                'client_id={}&client_secret={}&code={}'
+    token_url = token_url.format(client_id, client_secret, code)
+    header = {
+        "accept":"application/json"
+    }
+    res = request.post(token_url,headers = header)
+    if res.status_code == 200:
+        res_dict = res.json()
+        access_token = res_dict["access_token"]
+
+    user_url = 'https://api.github.com/user'
+    access_token = 'token {}'.format(access_token)
+    headers = {
+        'accept': 'application/json',
+        'Authorization': access_token
+    }
+    isLogin = 0
+    res = request.get(user_url, headers=headers)
+    if res.status_code == 200:
+        user_info = res.json()
+        email = user_info.get('email', None)
+        company_name = user_info.get('company',None)
+        isLogin = 1
+        return render_template('home.html', email=email,company_name=company_name,isLogin = isLogin)
+    return redirect('/f1_circuits')
 
 @app.route('/f1_circuits')
-def Home():
+def home():
     return render_template('./template/Home.html')
 
 @app.route("/f1_circuits/add/")
